@@ -1,6 +1,14 @@
 # Cursor Provider for OpenClaw
 
-Add Cursor as a model provider in OpenClaw - access Claude 4.5, GPT-5.2, and Gemini through your $20/month Cursor subscription.
+Use your Cursor Pro subscription as an AI provider in OpenClaw. Access all available models through a unified OpenAI-compatible API.
+
+## Features
+
+- **Automatic Model Discovery** - Syncs all available models from your subscription
+- **Smart Metadata** - Infers reasoning capability, context windows, and speed tiers
+- **Model Aliases** - Quick shortcuts like `/model opus`, `/model fast`
+- **Cross-Platform** - Linux (systemd), macOS (launchd), Windows (pm2)
+- **Auto-Updates** - Daily sync catches new models automatically
 
 ## Quick Install
 
@@ -8,43 +16,61 @@ Add Cursor as a model provider in OpenClaw - access Claude 4.5, GPT-5.2, and Gem
 curl -fsSL https://raw.githubusercontent.com/GabrieleRisso/cursor-openclaw-bridge/main/install.sh | bash
 ```
 
-The installer will:
-1. Let you select your preferred model
-2. Guide you through authentication
-3. Configure OpenClaw automatically
-4. Start the provider service
+## Requirements
+
+- Cursor Pro/Pro+/Ultra subscription (cursor.com/pricing)
+- Node.js 18+
+- Python 3
+- jq
 
 ## Available Models
 
-| Alias | Model | Use Case |
-|-------|-------|----------|
-| `fast` | cursor/composer-1 | Quick tasks, unlimited |
-| `opus` | cursor/claude-4.5-opus-high | Best quality |
-| `sonnet` | cursor/claude-4.5-sonnet | Balanced |
-| `haiku` | cursor/claude-4.5-haiku | Fast |
-| `gpt` | cursor/gpt-5.2 | OpenAI |
-| `codex` | cursor/gpt-5.2-codex | Code |
-| `gemini` | cursor/gemini-3-pro | Google AI |
+Models are discovered automatically from your subscription. Common aliases:
+
+| Alias | Model | Description |
+|-------|-------|-------------|
+| `fast` | composer-1 | Unlimited, quick tasks |
+| `opus` | claude-4.5-opus-high | Best quality |
+| `sonnet` | claude-4.5-sonnet | Balanced |
+| `haiku` | claude-4.5-haiku | Fast |
+| `gpt` | gpt-5.2 | OpenAI |
+| `codex` | gpt-5.2-codex | Code generation |
+| `gemini` | gemini-3-pro | Google AI |
+| `flash` | gemini-3-flash | Fast Gemini |
 
 ## Usage
 
-Switch models via WhatsApp or chat:
+Switch models via chat:
 ```
-/model opus
-/model fast
-/model gpt
+/model opus     # Use Claude 4.5 Opus
+/model fast     # Use Composer-1 (unlimited)
+/model gpt      # Use GPT-5.2
 ```
 
-## Platform Support
+## Model Sync
 
-- **Linux**: systemd service
-- **macOS**: launchd service  
-- **Windows**: pm2 process
+Models sync automatically daily. Manual sync:
+```bash
+python3 ~/.openclaw/scripts/cursor_model_sync.py
+```
+
+## Service Management
+
+```bash
+# Linux
+systemctl --user status cursor-provider
+systemctl --user restart cursor-provider
+
+# macOS
+launchctl list | grep cursor
+
+# Check logs
+journalctl --user -u cursor-provider -f
+```
 
 ## Configuration
 
-The installer adds Cursor as a provider in `~/.openclaw/openclaw.json`:
-
+Provider settings in `~/.openclaw/openclaw.json`:
 ```json
 {
   "models": {
@@ -58,42 +84,36 @@ The installer adds Cursor as a provider in `~/.openclaw/openclaw.json`:
 }
 ```
 
+## Troubleshooting
+
+**Proxy not responding:**
+```bash
+curl http://127.0.0.1:3010/v1/models
+systemctl --user restart cursor-provider
+```
+
+**Update cookie:**
+```bash
+# Edit and restart
+nano ~/.openclaw/cursor-proxy/.env
+systemctl --user restart cursor-provider
+```
+
+**Version mismatch error:**
+The installer auto-patches the client version. If issues persist, check your Cursor version and update manually in `~/.openclaw/cursor-proxy/src/routes/v1.js`.
+
 ## Files
 
 | Path | Description |
 |------|-------------|
-| `~/.openclaw/providers/cursor/` | Provider installation |
-| `~/.openclaw/providers/cursor/.env` | Authentication |
-| `~/.config/systemd/user/cursor-provider.service` | Service (Linux) |
-
-## Service Management
-
-```bash
-# Linux
-systemctl --user status cursor-provider
-systemctl --user restart cursor-provider
-
-# macOS
-launchctl list | grep cursor
-
-# pm2
-pm2 status cursor-provider
-```
-
-## Troubleshooting
-
-**Provider not responding:**
-```bash
-curl http://127.0.0.1:3010/health
-systemctl --user restart cursor-provider
-```
-
-**Re-authenticate:**
-```bash
-~/.openclaw/scripts/cursor-login.sh
-systemctl --user restart cursor-provider
-```
+| `~/.openclaw/cursor-proxy/` | Proxy installation |
+| `~/.openclaw/cursor-proxy/.env` | Authentication |
+| `~/.openclaw/scripts/cursor_model_sync.py` | Model sync script |
 
 ## License
 
-MIT
+MIT - See LICENSE file
+
+---
+
+*This is an independent project. Requires a valid Cursor subscription.*

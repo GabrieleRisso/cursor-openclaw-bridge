@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2026 Gabriele Risso
+Copyright (c) 2026 Contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,3 +19,24 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+---
+
+IMPORTANT NOTICE
+
+This software is an independent project and is not affiliated with, endorsed
+by, or connected to Anysphere, Inc. or Cursor in any way. 
+
+Users of this software are responsible for:
+- Maintaining a valid Cursor subscription (cursor.com/pricing)
+- Complying with Cursor's Terms of Service (cursor.com/terms-of-service)
+- Using the software within their subscription's usage limits
+- Reviewing and accepting all applicable terms and policies
+
+This tool simply provides an alternative interface to services you already
+have legitimate access to through your paid subscription. It does not bypass
+any authentication, circumvent rate limits, or access services you are not
+entitled to use.
+
+By using this software, you acknowledge that you have read and agree to
+Cursor's Terms of Service and accept full responsibility for your usage.
