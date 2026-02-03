@@ -1,21 +1,6 @@
-# Cursor-OpenClaw Bridge
+# Cursor Provider for OpenClaw
 
-Route your OpenClaw AI through Cursor IDE subscription ($20/month unlimited access to Claude, GPT, Gemini).
-
-```
-┌─────────────┐     ┌──────────────┐     ┌──────────────┐     ┌────────────┐
-│  WhatsApp   │────▶│   OpenClaw   │────▶│ Cursor Proxy │────▶│ Cursor API │
-│  Terminal   │     │   Gateway    │     │   :3010      │     │ (Claude+)  │
-└─────────────┘     └──────────────┘     └──────────────┘     └────────────┘
-```
-
-## Features
-
-- **Flat rate**: $20/month Cursor subscription vs per-token API costs
-- **Multiple models**: Claude 4.5, GPT-5.2, Gemini 3 via single subscription
-- **Auto-failover**: Falls back to Anthropic API if proxy unavailable
-- **Cross-platform**: Linux (systemd), macOS (launchd), Windows (pm2)
-- **ClawHub ready**: Install as OpenClaw skill
+Add Cursor as a model provider in OpenClaw - access Claude 4.5, GPT-5.2, and Gemini through your $20/month Cursor subscription.
 
 ## Quick Install
 
@@ -23,33 +8,11 @@ Route your OpenClaw AI through Cursor IDE subscription ($20/month unlimited acce
 curl -fsSL https://raw.githubusercontent.com/GabrieleRisso/cursor-openclaw-bridge/main/install.sh | bash
 ```
 
-Or via ClawHub:
-
-```bash
-clawhub install cursor-proxy
-```
-
-## Setup
-
-1. **Install the proxy**:
-   ```bash
-   ./install.sh
-   ```
-
-2. **Login to Cursor** (get session cookie):
-   ```bash
-   ~/.openclaw/scripts/cursor-login.sh
-   ```
-
-3. **Start the proxy**:
-   ```bash
-   systemctl --user start cursor-proxy
-   ```
-
-4. **Restart OpenClaw**:
-   ```bash
-   systemctl --user restart openclaw-gateway
-   ```
+The installer will:
+1. Let you select your preferred model
+2. Guide you through authentication
+3. Configure OpenClaw automatically
+4. Start the provider service
 
 ## Available Models
 
@@ -58,27 +21,29 @@ clawhub install cursor-proxy
 | `fast` | cursor/composer-1 | Quick tasks, unlimited |
 | `opus` | cursor/claude-4.5-opus-high | Best quality |
 | `sonnet` | cursor/claude-4.5-sonnet | Balanced |
-| `gpt` | cursor/gpt-5.2 | OpenAI alternative |
+| `haiku` | cursor/claude-4.5-haiku | Fast |
+| `gpt` | cursor/gpt-5.2 | OpenAI |
+| `codex` | cursor/gpt-5.2-codex | Code |
 | `gemini` | cursor/gemini-3-pro | Google AI |
 
-Switch models via WhatsApp: `/model opus`
+## Usage
 
-## Cron Jobs (Optional)
-
-Set up automated monitoring:
-
-```bash
-./scripts/setup-cron.sh +1234567890
+Switch models via WhatsApp or chat:
+```
+/model opus
+/model fast
+/model gpt
 ```
 
-Creates:
-- **System Monitor**: Every 30min, alerts on low battery/high temp
-- **Daily Summary**: 8am daily status report
-- **Proxy Health**: Hourly health check
+## Platform Support
+
+- **Linux**: systemd service
+- **macOS**: launchd service  
+- **Windows**: pm2 process
 
 ## Configuration
 
-The installer adds to `~/.openclaw/openclaw.json`:
+The installer adds Cursor as a provider in `~/.openclaw/openclaw.json`:
 
 ```json
 {
@@ -86,7 +51,6 @@ The installer adds to `~/.openclaw/openclaw.json`:
     "providers": {
       "cursor": {
         "baseUrl": "http://127.0.0.1:3010/v1",
-        "apiKey": "${CURSOR_COOKIE}",
         "api": "openai-completions"
       }
     }
@@ -98,51 +62,38 @@ The installer adds to `~/.openclaw/openclaw.json`:
 
 | Path | Description |
 |------|-------------|
-| `~/.openclaw/cursor-proxy/` | Proxy installation |
-| `~/.openclaw/cursor-proxy/.env` | Session cookie |
-| `~/.openclaw/scripts/cursor-login.sh` | Login script |
-| `~/.config/systemd/user/cursor-proxy.service` | Service file |
+| `~/.openclaw/providers/cursor/` | Provider installation |
+| `~/.openclaw/providers/cursor/.env` | Authentication |
+| `~/.config/systemd/user/cursor-provider.service` | Service (Linux) |
 
-## Commands
+## Service Management
 
-| Command | Description |
-|---------|-------------|
-| `/cursor` | Show status |
-| `/model list` | List models |
-| `/model <alias>` | Switch model |
+```bash
+# Linux
+systemctl --user status cursor-provider
+systemctl --user restart cursor-provider
+
+# macOS
+launchctl list | grep cursor
+
+# pm2
+pm2 status cursor-provider
+```
 
 ## Troubleshooting
 
-**Proxy not responding:**
+**Provider not responding:**
 ```bash
-systemctl --user restart cursor-proxy
-journalctl --user -u cursor-proxy -f
+curl http://127.0.0.1:3010/health
+systemctl --user restart cursor-provider
 ```
 
-**Cookie expired:**
+**Re-authenticate:**
 ```bash
 ~/.openclaw/scripts/cursor-login.sh
-systemctl --user restart cursor-proxy
+systemctl --user restart cursor-provider
 ```
-
-**Test proxy:**
-```bash
-curl http://127.0.0.1:3010/v1/models
-```
-
-## Disclaimer
-
-⚠️ Using Cursor's internal API may violate their ToS. For personal/educational use only.
 
 ## License
 
-MIT - See [LICENSE](LICENSE)
-
-## Contributing
-
-PRs welcome! This skill is designed for integration into official OpenClaw/ClawHub.
-
-## Credits
-
-- [JiuZ-Chn/Cursor-To-OpenAI](https://github.com/JiuZ-Chn/Cursor-To-OpenAI) - Base proxy
-- [OpenClaw](https://openclaw.ai) - AI agent framework
+MIT
